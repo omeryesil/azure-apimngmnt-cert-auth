@@ -3,12 +3,24 @@
         <base />
         <set-backend-service base-url="https://awapi-test-http.azurewebsites.net" />
         <choose>
-            <!-- 
+            <!--            
                 <when condition="@(context.Request.Certificate == null || !context.Request.Certificate.Verify() || context.Request.Certificate.Thumbprint != "DESIRED-THUMBPRINT-IN-UPPER-CASE")" >
-                -->
-            <when condition="@(context.Request.Certificate == null || !context.Request.Certificate.Verify() )">
+            -->
+            <when condition="@(context.Request.Certificate == null )">
                 <return-response>
                     <set-status code="401" reason="Client certificate required" />
+                </return-response>
+            </when>
+            <!--
+            <when condition="@(!context.Request.Certificate.Verify() )">
+                <return-response>
+                    <set-status code="401" reason="Client certificate is not valid" />
+                </return-response>
+            </when>
+            -->
+            <when condition="@(context.Request.Certificate.Thumbprint != "2BEA528C7781DFC49E3F2AE4B7C78223B62F8B3A" )">
+                <return-response>
+                    <set-status code="401" reason="Client certificate is not valid" />
                 </return-response>
             </when>
         </choose>
@@ -18,8 +30,20 @@
         <set-header name="certIssuer" exists-action="override">
             <value>@(context.Request.Certificate.Issuer)</value>
         </set-header>
+        <set-header name="certThumpPrint" exists-action="override">
+            <value>@(context.Request.Certificate.Thumbprint)</value>
+        </set-header>
         <set-header name="certSubjectName" exists-action="override">
-            <value>@(context.Request.Certificate.SubjectName.Name)</value>
+            <value>@{
+                    //this specific example parses the OU value, which can be something else...
+                    var list = context.Request.Certificate.SubjectName.Name.Split(',');
+                    foreach (var part in list) {
+                        if (part.IndexOf("OU=")>=0) {
+                            return part.Replace("OU=", "").Replace("\"", "");
+                        }
+                    }
+                    return "";
+                }</value>
         </set-header>
         <set-header name="certNotBefore" exists-action="override">
             <value>@(context.Request.Certificate.NotBefore.ToString())</value>
