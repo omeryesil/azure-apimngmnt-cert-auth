@@ -1,0 +1,40 @@
+<policies>
+    <inbound>
+        <base />
+        <set-backend-service base-url="https://awapi-test-http.azurewebsites.net" />
+        <choose>
+            <!-- 
+                <when condition="@(context.Request.Certificate == null || !context.Request.Certificate.Verify() || context.Request.Certificate.Thumbprint != "DESIRED-THUMBPRINT-IN-UPPER-CASE")" >
+                -->
+            <when condition="@(context.Request.Certificate == null || !context.Request.Certificate.Verify() )">
+                <return-response>
+                    <set-status code="401" reason="Client certificate required" />
+                </return-response>
+            </when>
+        </choose>
+        <set-header name="testHEader" exists-action="override">
+            <value>blablabla</value>
+        </set-header>
+        <set-header name="certIssuer" exists-action="override">
+            <value>@(context.Request.Certificate.Issuer)</value>
+        </set-header>
+        <set-header name="certSubjectName" exists-action="override">
+            <value>@(context.Request.Certificate.SubjectName.Name)</value>
+        </set-header>
+        <set-header name="certNotBefore" exists-action="override">
+            <value>@(context.Request.Certificate.NotBefore.ToString())</value>
+        </set-header>
+        <set-header name="certNotAfter" exists-action="override">
+            <value>@(context.Request.Certificate.NotAfter.ToString())</value>
+        </set-header>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>

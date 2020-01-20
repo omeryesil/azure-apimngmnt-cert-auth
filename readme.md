@@ -1,44 +1,55 @@
+# Azure Api Management - Authentication APIs with Client Certificates
 
-Generate certificate 
+Reference: <https://docs.microsoft.com/en-us/azure/api-management/api-management-howto-mutual-certificates-for-clients>
 
-https://gist.github.com/mtigas/952344
+- API Management provides the capability to secure access to APIs (i.e., **client to API Management**) using client certificates. You can validate incoming certificate and check certificate properties against desired values using policy expressions.
 
-## Step 1 - Create Certificate Authority Root
+## Steps
 
-```shell
-CERT_PASS=abcd1234
+### 1. Enable "Negotiate client certificate"
+
+- From API Management, select "Custom Domains", then select "Negotiate client certificate"
+
+  - By enabling the client certificate negotiation, the API management requires clients to send certificates in every call.
+  - Note that this does not validate the certificate with CA authority(**?**). Check policy section for validation
+
+
+
+### 2. Policy
+
+Creating API Management policy to **verify** certificate and forward vertificate paramters to backend apps (APIs)
+
+how context.Request.Certificate.Verify() verifies 
+https://github.com/MicrosoftDocs/azure-docs/issues/35369
+
+
+```xml
+<policies>
+    <inbound>
+        <base />
+        <set-backend-service base-url="https://awapi-test-http.azurewebsites.net" />
+        <choose>
+            <when condition="@(context.Request.Certificate == null || !context.Request.Certificate.Verify() || context.Request.Certificate.Issuer != "trusted-issuer" || context.Request.Certificate.SubjectName.Name != "expected-subject-name")">
+                <return-response>
+                    <set-status code="403" reason="Invalid client certificate" />
+                </return-response>
+            </when>
+        </choose>
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
+
+
 ```
 
 
-- Generate ca.pass.key and ca.key files
-  ```shell
-  openssl genrsa -aes256 -passout pass:${CERT_PASS} -out ca.pass.key 4096
-  openssl rsa -passin pass:${CERT_PASS} -in ca.pass.key -out ca.key
-  rm ca.pass.key
-  ```
 
-- Generate the CA root cert 
-  when prompted, use whatever you'd like, but i'd recommend some human-readable Organization and Common Name.
 
-  ```shell
-  openssl req -new -x509 -days 3650 -key ca.key -out ca.pem
-  ```
-
-## Create Client Key and CSR 
-
-```shell
-CLIENT_ID="01-mydevice"
-CLIENT_SERIAL=01
-
-openssl genrsa -aes256 -passout pass:${CERT_PASS} -out ${CLIENT_ID}.pass.key 4096
-openssl rsa -passin pass:${CERT_PASS} -in ${CLIENT_ID}.pass.key -out ${CLIENT_ID}.key 
-rm ${CLIENT_ID}.pass.key
-
-# generate the CSR
-# i think the Common Name is the only important thing here. think of it like
-# a display name or login.
-openssl req -new -key ${CLIENT_ID}.key -out ${CLIENT_ID}.csr
-
-# issue this certificate, signed by the CA root we made in the previous section
-openssl x509 -req -days 3650 -in ${CLIENT_ID}.csr -CA ca.pem -CAkey ca.key -set_serial ${CLIENT_SERIAL} -out ${CLIENT_ID}.pem
-```
