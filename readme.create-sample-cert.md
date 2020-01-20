@@ -4,9 +4,13 @@ https://gist.github.com/mtigas/952344
 
 - **CER files:** CER file is used to store X.509 certificate. Normally used for SSL certification to verify and identify web servers security. The file contains information about certificate owner and public key. A CER file can be in binary (ASN.1 DER) or encoded with Base-64 with header and footer included (PEM), Windows will recognize either of these layout.
 
+- **CRT files:** CRT is a file extension for a digital certificate file used with a web browser. CRT files are used to verify a secure website's authenticity, distributed by certificate authority (CA) companies such as GlobalSign, VeriSign and Thawte.
+
 - **PVK files:** Stands for Private Key. Windows uses PVK files to store private keys for code signing in various Microsoft products. PVK is proprietary format.
 
 - **PFX files:** Personal Exchange Format, is a PKCS12 file. This contains a variety of cryptographic information, such as certificates, root authority certificates, certificate chains and private keys. It’s cryptographically protected with passwords to keep private keys private and preserve the integrity of the root certificates. The PFX file is also used in various Microsoft products, such as IIS.
+
+- **CSR files:** CSR stands for Certificate Signing Request. A CSR contains information such your organization's name, your domain name, and your location, and is filled out and submitted to a certificate authority such as SSL.com. The information in a CSR is used to verify and create your SSL certificate
 
 ## Step 1 - Create Certificate Authority Root
 
@@ -22,7 +26,7 @@ CERT_PASS=abcd1234
   rm ca.pass.key
   ```
 
-- Generate the CA root cert
+- Generate the CA root cert in Pem and Cer formats
   when prompted, use whatever you'd like, but i'd recommend some human-readable Organization and Common Name.
 
   ```shell
@@ -35,7 +39,6 @@ CERT_PASS=abcd1234
   openssl x509 -inform PEM -in ca.pem -outform DER -out ca.cer
   ```
 
-
 ## Create Client Key and CSR
 
 ```shell
@@ -43,7 +46,7 @@ CLIENT_ID="01-mydevice"
 CLIENT_SERIAL=01
 
 openssl genrsa -aes256 -passout pass:${CERT_PASS} -out ${CLIENT_ID}.pass.key 4096
-openssl rsa -passin pass:${CERT_PASS} -in ${CLIENT_ID}.pass.key -out ${CLIENT_ID}.key 
+openssl rsa -passin pass:${CERT_PASS} -in ${CLIENT_ID}.pass.key -out ${CLIENT_ID}.key
 rm ${CLIENT_ID}.pass.key
 
 # generate the CSR
