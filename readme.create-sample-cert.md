@@ -1,6 +1,7 @@
 
-Generate certificate 
-https://gist.github.com/mtigas/952344
+# Generate CA Root cert and sample Client Certificates
+
+Ref: https://gist.github.com/mtigas/952344
 
 - **CER files:** CER file is used to store X.509 certificate. Normally used for SSL certification to verify and identify web servers security. The file contains information about certificate owner and public key. A CER file can be in binary (ASN.1 DER) or encoded with Base-64 with header and footer included (PEM), Windows will recognize either of these layout.
 
