@@ -18,7 +18,7 @@
                 </return-response>
             </when>
             -->
-            <when condition="@(context.Request.Certificate.Thumbprint != "2BEA528C7781DFC49E3F2AE4B7C78223B62F8B3A" )">
+            <when condition="@(context.Request.Certificate.Thumbprint != "2BEA528C7781DFC49E3F2AE4B7C78223B62F8B3A" || context.Request.Certificate.Issuer != "CN=PRESTO Issuing CA, DC=prestomig, DC=net" ||  context.Request.Certificate.NotBefore > DateTime.Now || context.Request.Certificate.NotAfter < DateTime.Now )">
                 <return-response>
                     <set-status code="401" reason="Client certificate is not valid" />
                 </return-response>

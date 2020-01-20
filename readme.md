@@ -23,6 +23,8 @@ how context.Request.Certificate.Verify() verifies
 https://github.com/MicrosoftDocs/azure-docs/issues/35369
 
 
+context.Request.Certificate.Verify() will check both its validity a revocation list.
+
 ```xml
 <policies>
     <inbound>
