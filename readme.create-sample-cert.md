@@ -40,6 +40,12 @@ CERT_PASS=abcd1234
   openssl x509 -inform PEM -in ca.pem -outform DER -out ca.cer
   ```
 
+- Create public key (just for fun)
+
+  ```shell
+  openssl x509 -inform der -in ca.cer -pubkey -noout > ca.pubkey.pem
+  ```
+
 ## Create Client Key and CSR
 
 ```shell
