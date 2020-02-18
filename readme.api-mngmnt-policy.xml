@@ -2,13 +2,11 @@
     <inbound>
         <base />
         <choose>
-            <!--
             <when condition="@(context.Request.Certificate == null )">
                 <return-response>
                     <set-status code="401" reason="Client certificate required" />
                 </return-response>
             </when>
-            -->
             <when condition="@(!context.Request.Certificate.VerifyNoRevocation() )">
                 <return-response>
                     <set-status code="401" reason="Client certificate is not valid" />
